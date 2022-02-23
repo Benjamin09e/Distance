@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcul de distance entre deux points</title>
+</head>
+
+<body>
+    <div id="map" style="width: 100vw; height: 10vh"></div>
+    <!-- Api non fonctionnel-->
+    <script src="https://js.api.here.com/v3/3.0/mapsjs-core.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.0/mapsjs-service.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        const platform = new H.service.Platform({
+            "app_id": "2gpovxVmPf9MDcjYl3qE",
+            "app_code": "NvyZM683OvZ3er-UTg59ieHwDmiFDl4k3j-QAL6u38"
+        });
+        const map = new H.Map(
+            document.getElementById("map"),
+            platform.createDefaultLayers().normal.map, {
+                zoom: 11,
+                center: {
+                    lat: 45.85,
+                    lng: 1.261105
+                }
+            }
+        );
+
+        const routingService = platform.getRoutingService();
+        const tracyMarker = new H.map.Marker({
+            lat: 45.7785,
+            lng: 1.261105
+        });
+        const stocktonMarker = new H.map.Marker({
+            lat: 37.9985,
+            lng: -121.2366
+        });
+        const straightLineString = new H.geo.LineString();
+        straightLineString.pushPoint(tracyMarker.getPosition());
+        straightLineString.pushPoint(stockonMarker.getPosition());
+        const straightPolyline = new H.map.Polyline(straightLineString, {
+            style: {
+                lineWidth: 5
+            }
+        });
+        const parms = {
+            mode: "fastest;car;traffic:enabled",
+            waypoint0: "45.7397, 1.861105",
+            waypoint1: "45.9397, 1.5611052",
+            representation: "display"
+        };
+
+        routingService.calculateRoute(params, succes => {
+            const routelineString = new H.geo.LineString();
+            succes.response.route[0].shape.forEach(point => {
+                const [lat, lng] = point.split(",");
+                routeLineString.pushPoint({
+                    lat: lat,
+                    lng: lng
+                });
+            });
+            const routePolyline = new H.map.Polyline(
+                routeLineString, {
+                    style: {
+                        lineWidth: 5
+                    }
+                }
+            );
+            map.addObject(routePolyline);
+        }, error => {
+            console.log(error);
+        });
+        map.addObjects([tracyMarker, stocktonMarker, straightLineString]);
+        const distance = tracyMarker.getPosition().distance(stocktonMarker.getPosition());
+        console.log(distance);
+    </script>
+
+
+</body>
+
+
+</html>
